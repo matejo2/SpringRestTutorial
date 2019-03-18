@@ -14,6 +14,11 @@ public class EmployeeController {
     }
 
     // Aggregate Root
+    @GetMapping("/")
+    public String hello(){
+        return "Hallo Misha";
+    }
+
 
     @GetMapping("/employees")
     public List<Employee> getAllEmployees(){
@@ -28,7 +33,7 @@ public class EmployeeController {
     // single item
 
     @GetMapping("/employees/{id}")
-    Employee one(@PathVariable Long id) {
+    Employee getEmployeeById(@PathVariable Long id) {
 
         return repository.findById(id)
                .orElseThrow(() -> new EmployeeNotFoundException(id));
