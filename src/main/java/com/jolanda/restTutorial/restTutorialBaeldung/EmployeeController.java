@@ -1,8 +1,13 @@
 package com.jolanda.restTutorial.restTutorialBaeldung;
 
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 public class EmployeeController {
@@ -26,21 +31,30 @@ public class EmployeeController {
     }
 
     @PostMapping("/employees")
-    Employee newEmployee(@RequestBody Employee newEmployee) {
+    public Employee newEmployee(@RequestBody Employee newEmployee) {
         return repository.save(newEmployee);
     }
 
     // single item
 
     @GetMapping("/employees/{id}")
-    Employee getEmployeeById(@PathVariable Long id) {
+    public Resource<Employee> getEmployeeById(@PathVariable Long id) {
 
-        return repository.findById(id)
-               .orElseThrow(() -> new EmployeeNotFoundException(id));
+        Employee employee = repository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
+
+       // Link link = linkTo(methodOn(EmployeeController.class).getEmployeeById(id)).withSelfRel();
+
+        // Link link = linkTo(EmployeeController.class).slash(employee.getId()).withSelfRel();
+        // employee.add(link);
+
+        return new Resource<>(employee,
+                linkTo(methodOn(EmployeeController.class).getEmployeeById(id)).withSelfRel(),
+                linkTo(methodOn(EmployeeController.class).getAllEmployees()).withRel("employees"));
     }
 
     @PutMapping("/employees/{id}")
-    Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
+    public Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
 
         return repository.findById(id)
                 .map(employee -> {employee.setName(newEmployee.getName());
@@ -56,4 +70,5 @@ public class EmployeeController {
     void deleteEmployee(@PathVariable Long id){
         repository.deleteById(id);
     }
+
 }
